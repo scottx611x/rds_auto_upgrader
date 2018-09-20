@@ -21,7 +21,7 @@ class RDSPostgresUpgrader():
         db_instance_status = self.get_db_status()
         print("{} DBInstanceStatus: {}".format(self.db_instance_id,
                                                db_instance_status))
-        while db_instance_status == status and is_undesired_status:
+        while db_instance_status != status and is_undesired_status:
             print(message)
             time.sleep(wait_time)
 
