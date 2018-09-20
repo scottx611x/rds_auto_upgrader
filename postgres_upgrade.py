@@ -9,6 +9,8 @@ class RDSPostgresUpgrader():
 
     def __init__(self, db_instance_id, pg_engine_versions):
         self.db_instance_id = db_instance_id
+        if type(pg_engine_versions) in [str, float]:
+            pg_engine_versions = [str(pg_engine_versions)]
         self.pg_engine_versions = pg_engine_versions
 
     def get_db_status(self):
