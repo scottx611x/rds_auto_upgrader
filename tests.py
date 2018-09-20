@@ -32,7 +32,7 @@ class RDSPostgresUpgraderTests(unittest.TestCase):
             )
 
     @mock.patch.object(RDSPostgresUpgrader, "_modify_db")
-    def test_upgrade(self, sleep_mock, modify_db_mock):
+    def test_upgrade_many_versions(self, sleep_mock, modify_db_mock):
         with mock.patch(
             "postgres_upgrade.RDSPostgresUpgrader.get_db_status",
             side_effect=self.db_instance_statuses
@@ -40,6 +40,15 @@ class RDSPostgresUpgraderTests(unittest.TestCase):
             self.rds_pg_upgrader.upgrade()
         self.assertEqual(modify_db_mock.call_count,
                          len(self.pg_engine_versions) + 1)
+
+    @mock.patch.object(RDSPostgresUpgrader, "_modify_db")
+    def test_upgrade_single_version(self, sleep_mock, modify_db_mock):
+        with mock.patch(
+            "postgres_upgrade.RDSPostgresUpgrader.get_db_status",
+            side_effect=self.db_instance_statuses
+        ):
+            RDSPostgresUpgrader("test-rds-id", "9.4.18").upgrade()
+        self.assertEqual(modify_db_mock.call_count, 1)
 
 if __name__ == '__main__':
     unittest.main()
