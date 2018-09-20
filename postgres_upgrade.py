@@ -12,17 +12,23 @@ class RDSPostgresUpgrader():
         self.pg_engine_versions = pg_engine_versions
 
     def get_db_status(self):
-        return self.client.describe_db_instances(
+        db_instance_status = self.client.describe_db_instances(
             DBInstanceIdentifier=self.db_instance_id
         )["DBInstances"][0]["DBInstanceStatus"]
-
-    def wait_for_db_status(self, status, message, wait_time=60,
-                           is_undesired_status=False):
-        db_instance_status = self.get_db_status()
         print("{} DBInstanceStatus: {}".format(self.db_instance_id,
                                                db_instance_status))
-        while db_instance_status != status and is_undesired_status:
+        return db_instance_status
+
+    def wait_for_db_status(self, status, message="", wait_time=60,
+                           is_undesired_status=False):
+        def _check_status(db_instance_status):
             print(message)
+            if is_undesired_status:
+                return db_instance_status == status
+            else:
+                return db_instance_status != status
+
+        while _check_status(self.get_db_status()):
             time.sleep(wait_time)
 
     def _modify_db(self, pg_engine_version):
