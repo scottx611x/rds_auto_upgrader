@@ -10,3 +10,6 @@
 
 ### Usage:
 - `python postgres_upgrade.py <rds_db_instance_identifier>`
+
+### Tests:
+- `python tests.py`
