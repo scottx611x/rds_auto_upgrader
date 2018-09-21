@@ -8,12 +8,11 @@
 ### Installation:
 - `pip install -r requirements.txt`
 
-### Usage:
-- `python pg_upgrader.py <rds_db_instance_identifier>`
+### Examples:
+- `python pg_upgrader.py -id my-cool-db -v 9.6.9 10.4`
+- With Docker:
+  - `docker build -t pg_upgrader .`
+  - `docker run -it --rm -v ~/.aws:/root/.aws -e RDS_DB_INSTANCE_ID=my-cool-db -e PG_ENGINE_TARGET_VERSIONS="9.6.9 10.4" pg_upgrader`
 
 ### Running Tests:
 - `python tests.py`
-
-### With Docker:
-- `docker build -t pg_upgrader .`
-- `docker run -it --rm -v ~/.aws:/root/.aws -e RDS_DB_INSTANCE_ID=db-upgrade-test -e PG_ENGINE_TARGET_VERSIONS="9.6.9 10.4" pg_upgrader`
