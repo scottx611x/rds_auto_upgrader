@@ -1,6 +1,6 @@
 import os
 import sys
-
+import time
 import boto3
 
 
@@ -24,6 +24,7 @@ class RDSPostgresUpgrader():
             AllowMajorVersionUpgrade=True,
             ApplyImmediately=True
         )
+        time.sleep(30)
 
     def upgrade(self):
         for pg_engine_version in self.pg_engine_versions:
