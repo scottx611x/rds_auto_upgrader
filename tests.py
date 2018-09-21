@@ -1,6 +1,6 @@
 import unittest
 from unittest import mock
-from postgres_upgrade import RDSPostgresUpgrader
+from pg_upgrader import RDSPostgresUpgrader
 
 
 @mock.patch("time.sleep")

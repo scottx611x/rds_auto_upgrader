@@ -9,7 +9,8 @@
 - `pip install -r requirements.txt`
 
 ### Usage:
-- `python postgres_upgrade.py <rds_db_instance_identifier>`
+- `python pg_upgrader.py <rds_db_instance_identifier>`
+
 
 ### Tests:
 - `python tests.py`

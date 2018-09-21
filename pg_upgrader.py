@@ -1,3 +1,4 @@
+import os
 import sys
 import time
 
@@ -72,9 +73,10 @@ class RDSPostgresUpgrader():
 if __name__ == '__main__':
     TARGETED_PG_ENGINE_VERSIONS = ["9.4.18", "9.5.13", "9.6.9", "10.4"]
 
-    rds_db_instance_identifier = sys.argv[1]
+    try:
+        rds_db_instance_identifier = sys.argv[1]
+    except IndexError:
+        rds_db_instance_identifier = os.environ.get("RDS_DB_INSTANCE_ID")
 
-    RDSPostgresUpgrader(
-        rds_db_instance_identifier,
-        TARGETED_PG_ENGINE_VERSIONS
-    ).upgrade()
+    RDSPostgresUpgrader(rds_db_instance_identifier,
+                        TARGETED_PG_ENGINE_VERSIONS).upgrade()
