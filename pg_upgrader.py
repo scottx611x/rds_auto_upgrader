@@ -33,7 +33,7 @@ class RDSPostgresUpgrader():
 
     def _modify_db(self, db_instance_id):
             for pg_engine_version in self.pg_engine_versions:
-                logger.debug("Waiting for %s to become available", 
+                logger.debug("Waiting for %s to become available",
                              db_instance_id)
                 self.client.get_waiter("db_instance_available").wait(
                     DBInstanceIdentifier=db_instance_id
