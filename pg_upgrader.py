@@ -1,6 +1,7 @@
 import argparse
 import json
 import logging
+from multiprocessing import Process
 import time
 
 import boto3
@@ -30,19 +31,22 @@ class RDSPostgresUpgrader():
             )
         return uses_postgres
 
-    def _modify_db(self, db_instance_id, pg_engine_version):
-        logger.debug("Waiting for %s to become available", db_instance_id)
-        self.client.get_waiter("db_instance_available").wait(
-            DBInstanceIdentifier=db_instance_id
-        )
-        self.client.modify_db_instance(
-            DBInstanceIdentifier=db_instance_id,
-            EngineVersion=pg_engine_version,
-            AllowMajorVersionUpgrade=True,
-            ApplyImmediately=True
-        )
-        logger.debug("Upgrading %s to: %s", db_instance_id, pg_engine_version)
-        time.sleep(30)
+    def _modify_db(self, db_instance_id):
+            for pg_engine_version in self.pg_engine_versions:
+                logger.debug("Waiting for %s to become available", 
+                             db_instance_id)
+                self.client.get_waiter("db_instance_available").wait(
+                    DBInstanceIdentifier=db_instance_id
+                )
+                self.client.modify_db_instance(
+                    DBInstanceIdentifier=db_instance_id,
+                    EngineVersion=pg_engine_version,
+                    AllowMajorVersionUpgrade=True,
+                    ApplyImmediately=True
+                )
+                logger.debug("Upgrading %s to: %s",
+                             db_instance_id, pg_engine_version)
+                time.sleep(30)
 
     def _set_db_instance_ids_from_tags(self):
         matching_db_instance_ids = set([])
@@ -67,8 +71,7 @@ class RDSPostgresUpgrader():
     def upgrade(self):
         for db_instance_id in self.db_instance_ids:
             if self._uses_postgres(db_instance_id):
-                for pg_engine_version in self.pg_engine_versions:
-                    self._modify_db(db_instance_id, pg_engine_version)
+                self._modify_db(db_instance_id)
 
 
 def create_parser():

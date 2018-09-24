@@ -11,8 +11,11 @@ class RDSPostgresUpgraderTests(unittest.TestCase):
         RDSPostgresUpgrader.client, "describe_db_instances",
         return_value=describe_db_instances
     )
-    @mock.patch("pg_upgrader.RDSPostgresUpgrader._modify_db")
-    def test_upgrade(self, modify_db_mock, describe_dbs_mock):
+    @mock.patch.object(RDSPostgresUpgrader.client, "get_waiter")
+    @mock.patch.object(RDSPostgresUpgrader.client, "modify_db_instance")
+    @mock.patch("time.sleep")
+    def test_upgrade(self, sleep_mock, modify_db_mock, get_waiter_mock,
+                     describe_dbs_mock):
         db_instance_ids = ["test-rds-id-a", "test-rds-id-b"]
         pg_engine_versions = ["9.4.18", "9.5.13", "9.6.9", "10.4"]
         RDSPostgresUpgrader(pg_engine_versions, ids=db_instance_ids).upgrade()
