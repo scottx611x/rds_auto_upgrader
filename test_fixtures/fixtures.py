@@ -1,3 +1,4 @@
+import copy
 import datetime
 from dateutil.tz import tzutc
 
@@ -98,6 +99,10 @@ describe_db_instances = {
         }
     ]
 }
+
+non_postgres_describe_db_instances = copy.deepcopy(describe_db_instances)
+non_postgres_describe_db_instances["DBInstances"][0]["Engine"] = "mysql"
+
 
 list_tags_for_resource = {
     'TagList': [
