@@ -13,7 +13,7 @@
 - **Upgrade many `9.5.x` RDS instances to `10.4` by DbInstanceIdentifers**:
     - `python pg_upgrader.py -ids my-cool-db-a my-cool-db-b -versions 9.6.9 10.4`
 
-- **Upgrade many `9.5.x` RDS instances by DbInstanceTags**:
+- **Upgrade many `9.5.x` RDS instances to `10.4` by DbInstanceTags**:
     - `python pg_upgrader.py -tags {"Name": "test-rds-name", "owner": "test@example.com"} -versions 9.6.9 10.4`
 
 ### Running Tests:
