@@ -1,7 +1,7 @@
 # rds_postgres_upgrader
 
 ### Pre-Reqs:
-- `python 3 or docker`
+- `python 3`
 - AWS credentials [configured properly for `boto3`](https://boto3.amazonaws.com/v1/documentation/api/latest/guide/quickstart.html#configuration)
 - An RDS Instance in need of upgrading
 
