@@ -24,12 +24,12 @@ class RDSPostgresUpgraderTests(unittest.TestCase):
                             ids=args.rds_db_instance_ids).upgrade()
         self.assertEqual(modify_db_mock.call_count, 1)
 
-    @mock.patch(
-        "pg_upgrader.RDSPostgresUpgrader.client.list_tags_for_resource",
+    @mock.patch.object(
+        RDSPostgresUpgrader.client, "list_tags_for_resource",
         return_value=list_tags_for_resource
     )
-    @mock.patch(
-        "pg_upgrader.RDSPostgresUpgrader.client.describe_db_instances",
+    @mock.patch.object(
+        RDSPostgresUpgrader.client, "describe_db_instances",
         return_value=describe_db_instances
     )
     @mock.patch("pg_upgrader.RDSPostgresUpgrader._modify_db")
