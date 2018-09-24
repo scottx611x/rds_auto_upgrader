@@ -7,28 +7,28 @@ import boto3
 class RDSPostgresUpgrader():
     client = boto3.client('rds')
 
-    def __init__(self, db_instance_id, pg_engine_versions):
-        self.db_instance_id = db_instance_id
+    def __init__(self, db_instance_ids, pg_engine_versions):
+        self.db_instance_ids = db_instance_ids
         self.pg_engine_versions = pg_engine_versions
 
-    def _modify_db(self, pg_engine_version):
-        print("Waiting for {} to become available".format(self.db_instance_id))
+    def _modify_db(self, db_instance_id, pg_engine_version):
+        print("Waiting for {} to become available".format(db_instance_id))
         self.client.get_waiter("db_instance_available").wait(
-            DBInstanceIdentifier=self.db_instance_id
+            DBInstanceIdentifier=db_instance_id
         )
         self.client.modify_db_instance(
-            DBInstanceIdentifier=self.db_instance_id,
+            DBInstanceIdentifier=db_instance_id,
             EngineVersion=pg_engine_version,
             AllowMajorVersionUpgrade=True,
             ApplyImmediately=True
         )
-        print("Upgrading {} to: {}".format(
-              self.db_instance_id, pg_engine_version))
+        print("Upgrading {} to: {}".format(db_instance_id, pg_engine_version))
         time.sleep(30)
 
     def upgrade(self):
-        [self._modify_db(pg_engine_version)
-            for pg_engine_version in self.pg_engine_versions]
+        for db_instance_id in self.db_instance_ids:
+            for pg_engine_version in self.pg_engine_versions:
+                self._modify_db(db_instance_id, pg_engine_version)
 
 
 def create_parser():
@@ -36,8 +36,8 @@ def create_parser():
         description='Gather RDSPostgresUpgrader configurables.'
     )
     parser.add_argument(
-        '-id', '--rds_db_instance_id', type=str,
-        help='RDS DBInstanceIdentifier to target for an upgrade',
+        '-id', '--rds_db_instance_ids', type=str, nargs='+',
+        help='RDS DBInstanceIdentifier(s) to target for an upgrade',
         required=True
     )
     parser.add_argument(
@@ -50,7 +50,7 @@ def create_parser():
 
 def main():
     args = create_parser().parse_args()
-    RDSPostgresUpgrader(args.rds_db_instance_id,
+    RDSPostgresUpgrader(args.rds_db_instance_ids,
                         args.pg_target_versions).upgrade()
 
 if __name__ == '__main__':
