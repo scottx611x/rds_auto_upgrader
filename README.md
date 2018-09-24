@@ -10,10 +10,10 @@
 
 ### Examples:
 
-#### Upgrade many rds instances by DbInstanceIdentifers:
+#### Upgrade many RDS instances by DbInstanceIdentifers:
 - `python pg_upgrader.py -ids my-cool-db-a my-cool-db-b -versions 9.6.9 10.4`
 
-#### Upgrade many rds instances by DbInstanceTags:
+#### Upgrade many RDS instances by DbInstanceTags:
 - `python pg_upgrader.py -tags {"Name": "test-rds-name", "owner": "test@example.com"} -versions 9.6.9 10.4`
 
 ### Running Tests:
