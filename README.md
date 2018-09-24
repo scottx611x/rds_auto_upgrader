@@ -9,10 +9,8 @@
 - `pip install -r requirements.txt`
 
 ### Examples:
-- `python pg_upgrader.py -id my-cool-db -v 9.6.9 10.4`
-- With Docker:
-  - `docker build -t pg_upgrader .`
-  - `docker run -it --rm -v ~/.aws:/root/.aws -e RDS_DB_INSTANCE_ID=my-cool-db -e PG_ENGINE_TARGET_VERSIONS="9.6.9 10.4" pg_upgrader`
+- `python pg_upgrader.py -ids my-cool-db -versions 9.6.9 10.4`
+- `python pg_upgrader.py -tags {"Name": "test-rds-name", "owner": "test@example.com"} -versions 9.6.9 10.4`
 
 ### Running Tests:
 - `python tests.py`
