@@ -102,7 +102,7 @@ describe_db_instances = {
 list_tags_for_resource = {
     'TagList': [
         {
-            'Key': 'Owner',
+            'Key': 'owner',
             'Value': 'test@example.com'
         },
         {

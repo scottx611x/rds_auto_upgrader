@@ -37,11 +37,13 @@ class RDSPostgresUpgrader():
             )
             tag_list = tags.get("TagList")
             if tag_list is not None:
-                for tag in tag_list:
-                    if self.db_instance_tags.get(tag["Key"]) == tag["Value"]:
-                        matching_db_instance_ids.add(
-                            db_instance["DBInstanceIdentifier"]
-                        )
+                if all(
+                    self.db_instance_tags.get(tag["Key"]) == tag["Value"]
+                    for tag in tag_list
+                ):
+                    matching_db_instance_ids.add(
+                        db_instance["DBInstanceIdentifier"]
+                    )
         self.db_instance_ids = list(matching_db_instance_ids)
 
     def upgrade(self):
