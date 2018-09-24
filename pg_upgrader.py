@@ -6,9 +6,8 @@ import boto3
 
 
 class RDSPostgresUpgrader():
-    client = boto3.client('rds')
-
     def __init__(self, pg_engine_versions, ids=None, tags=None):
+        self.client = boto3.client('rds')
         self.pg_engine_versions = pg_engine_versions
         self.db_instance_ids = ids
         if tags is not None:
