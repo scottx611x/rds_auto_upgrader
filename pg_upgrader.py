@@ -27,7 +27,7 @@ class RDSPostgresUpgrader():
         if not uses_postgres:
             logger.error(
                 "Excluding DB instance: %s as it does not use postgres."
-                " DB Engine: %s was reported", db_instance_id, db_engine
+                " DB Engine: '%s' was reported", db_instance_id, db_engine
             )
         return uses_postgres
 
