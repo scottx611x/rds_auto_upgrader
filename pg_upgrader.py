@@ -1,12 +1,9 @@
 import argparse
 import json
-import logging
 from threading import Thread
 import time
 
 import boto3
-
-logger = logging.getLogger(__name__)
 
 
 class RDSPostgresUpgrader():
@@ -25,16 +22,17 @@ class RDSPostgresUpgrader():
         )["DBInstances"][0]["Engine"]
         uses_postgres = db_engine == "postgres"
         if not uses_postgres:
-            logger.error(
-                "Excluding DB instance: %s as it does not use postgres."
-                " DB Engine: '%s' was reported", db_instance_id, db_engine
+            print(
+                "Excluding DB instance: {} as it does not use postgres."
+                " DB Engine: '{}' was reported"
+                .format(db_instance_id, db_engine)
             )
         return uses_postgres
 
     def _modify_db(self, db_instance_id):
             for pg_engine_version in self.pg_engine_versions:
-                logger.debug("Waiting for %s to become available",
-                             db_instance_id)
+                print("Waiting for {} to become available"
+                      .format(db_instance_id))
                 self.client.get_waiter("db_instance_available").wait(
                     DBInstanceIdentifier=db_instance_id
                 )
@@ -44,8 +42,8 @@ class RDSPostgresUpgrader():
                     AllowMajorVersionUpgrade=True,
                     ApplyImmediately=True
                 )
-                logger.debug("Upgrading %s to: %s",
-                             db_instance_id, pg_engine_version)
+                print("Upgrading {} to: {}"
+                      .format(db_instance_id, pg_engine_version))
                 time.sleep(30)
 
     def _set_db_instance_ids_from_tags(self):
@@ -64,8 +62,8 @@ class RDSPostgresUpgrader():
                         db_instance["DBInstanceIdentifier"]
                     )
         if not matching_db_instance_ids:
-            logger.error("No instances found matching tags: %s",
-                         self.db_instance_tags)
+            print("No instances found matching tags: {}"
+                  .format(self.db_instance_tags))
         self.db_instance_ids = list(matching_db_instance_ids)
 
     def upgrade(self):
