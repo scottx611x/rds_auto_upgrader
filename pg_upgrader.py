@@ -45,22 +45,24 @@ class RDSPostgresUpgrader():
                 print("Upgrading {} to: {}"
                       .format(db_instance_id, pg_engine_version))
                 time.sleep(30)
+                self.client.get_waiter("db_instance_available").wait(
+                    DBInstanceIdentifier=db_instance_id
+                )
+                print("Successfully upgraded {} to: {}"
+                      .format(db_instance_id, pg_engine_version))
 
     def _set_db_instance_ids_from_tags(self):
         matching_db_instance_ids = set([])
         for db_instance in self.client.describe_db_instances()["DBInstances"]:
-            tags = self.client.list_tags_for_resource(
+            tag_list = self.client.list_tags_for_resource(
                 ResourceName=db_instance["DBInstanceArn"]
-            )
-            tag_list = tags.get("TagList")
-            if tag_list is not None:
-                if all(
-                    self.db_instance_tags.get(tag["Key"]) == tag["Value"]
-                    for tag in tag_list
-                ):
-                    matching_db_instance_ids.add(
-                        db_instance["DBInstanceIdentifier"]
-                    )
+            )["TagList"]
+
+            if all(self.db_instance_tags.get(tag["Key"]) == tag["Value"]
+                   for tag in tag_list):
+                matching_db_instance_ids.add(
+                    db_instance["DBInstanceIdentifier"]
+                )
         if not matching_db_instance_ids:
             print("No instances found matching tags: {}"
                   .format(self.db_instance_tags))
