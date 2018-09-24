@@ -1,7 +1,7 @@
 import argparse
 import json
 import logging
-from multiprocessing import Process
+from threading import Thread
 import time
 
 import boto3
@@ -71,7 +71,8 @@ class RDSPostgresUpgrader():
     def upgrade(self):
         for db_instance_id in self.db_instance_ids:
             if self._uses_postgres(db_instance_id):
-                self._modify_db(db_instance_id)
+                t = Thread(target=self._modify_db, args=(db_instance_id,))
+                t.start()
 
 
 def create_parser():
