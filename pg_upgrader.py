@@ -67,10 +67,14 @@ class RDSPostgresUpgrader():
         self.db_instance_ids = list(matching_db_instance_ids)
 
     def upgrade(self):
+        threads = []
         for db_instance_id in self.db_instance_ids:
             if self._uses_postgres(db_instance_id):
-                t = Thread(target=self._modify_db, args=(db_instance_id,))
-                t.start()
+                thread = Thread(target=self._modify_db, args=(db_instance_id,))
+                threads.append(thread)
+                thread.start()
+        for thread in threads:
+            thread.join()
 
 
 def create_parser():
