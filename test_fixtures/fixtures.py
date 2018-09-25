@@ -1,129 +1,27 @@
-import copy
-import datetime
-from dateutil.tz import tzutc
+# coding=utf-8
 
-describe_db_instances = {
-    "DBInstances": [
-        {
-            'DBInstanceIdentifier': 'rds-test',
-            'DBInstanceClass': 'db.t2.small',
-            'Engine': 'postgres',
-            'DBInstanceStatus': 'available',
-            'MasterUsername': 'root',
-            'Endpoint': {
-                'Address': 'rds-test.example.us-east-1.rds.amazonaws.com',
-                'Port': 5432,
-                'HostedZoneId': 'xxxxxxxxxxxxxx'
-            },
-            'AllocatedStorage': 10,
-            'InstanceCreateTime': datetime.datetime(
-                2018, 1, 1, 1, 1, 1, 100000, tzinfo=tzutc()
-            ),
-            'PreferredBackupWindow': '06:46-07:16',
-            'BackupRetentionPeriod': 0,
-            'DBSecurityGroups': [],
-            'VpcSecurityGroups': [
-                {
-                    'VpcSecurityGroupId': 'sg-xxxxxxxx',
-                    'Status': 'active'
-                }
-            ],
-            'DBParameterGroups': [
-                {
-                    'DBParameterGroupName': 'default.postgres9.3',
-                    'ParameterApplyStatus': 'in-sync'
-                }
-            ],
-            'AvailabilityZone': 'us-east-1d',
-            'DBSubnetGroup': {
-                'DBSubnetGroupName': 'default',
-                'DBSubnetGroupDescription': 'default',
-                'VpcId': 'vpc-xxxxxxxx',
-                'SubnetGroupStatus': 'Complete',
-                'Subnets': [
-                    {
-                        'SubnetIdentifier': 'subnet-xxxxxxxa',
-                        'SubnetAvailabilityZone': {
-                            'Name': 'us-east-1a'
-                        },
-                        'SubnetStatus': 'Active'
-                    },
-                    {
-                        'SubnetIdentifier': 'subnet-xxxxxxxb',
-                        'SubnetAvailabilityZone': {
-                            'Name': 'us-east-1b'
-                        },
-                        'SubnetStatus': 'Active'
-                    },
-                    {
-                        'SubnetIdentifier': 'subnet-xxxxxxxc',
-                        'SubnetAvailabilityZone': {
-                            'Name': 'us-east-1c'
-                        },
-                        'SubnetStatus': 'Active'
-                    },
-                    {
-                        'SubnetIdentifier': 'subnet-xxxxxxxd',
-                        'SubnetAvailabilityZone': {
-                            'Name': 'us-east-1d'
-                        },
-                        'SubnetStatus': 'Active'
-                    }
-                ]
-            },
-            'PreferredMaintenanceWindow': 'fri:09:41-fri:10:11',
-            'PendingModifiedValues': {},
-            'MultiAZ': False,
-            'EngineVersion': '9.3.14',
-            'AutoMinorVersionUpgrade': False,
-            'ReadReplicaDBInstanceIdentifiers': [],
-            'LicenseModel': 'postgresql-license',
-            'OptionGroupMemberships': [
-                {
-                    'OptionGroupName': 'default:postgres-9-3',
-                    'Status': 'in-sync'
-                }
-            ],
-            'PubliclyAccessible': False,
-            'StorageType': 'gp2',
-            'DbInstancePort': 0,
-            'StorageEncrypted': False,
-            'DbiResourceId': 'db-XXXXXXXXXXXXXXXXXXXXXXXXX',
-            'CACertificateIdentifier': 'rds-ca-2015',
-            'DomainMemberships': [],
-            'CopyTagsToSnapshot': False,
-            'MonitoringInterval': 0,
-            'DBInstanceArn': 'arn:aws:rds:us-east-1:000000000000:db:rds-test',
-            'IAMDatabaseAuthenticationEnabled': False,
-            'PerformanceInsightsEnabled': False
-        }
-    ]
-}
-
-non_postgres_describe_db_instances = copy.deepcopy(describe_db_instances)
-non_postgres_describe_db_instances["DBInstances"][0]["Engine"] = "mysql"
-
+test_instance_name_key = "Name"
+test_instance_owner_key = "owner"
+test_instance_name_value = "test-rds-name"
+test_instance_owner_value = "test@example.com"
 
 list_tags_for_resource = {
     'TagList': [
         {
-            'Key': 'owner',
-            'Value': 'test@example.com'
+            'Key': 'Name',
+            'Value': test_instance_name_value
         },
         {
-            'Key': 'Name',
-            'Value': 'test-rds-name'
+            'Key': 'owner',
+            'Value': test_instance_owner_value
         }
-    ],
-    'ResponseMetadata': {
-        'RequestId': '00000000-0000-0000-0000-00000000000',
-        'HTTPStatusCode': 200,
-        'HTTPHeaders': {
-            'x-amzn-requestid': '00000000-0000-0000-0000-00000000000',
-            'content-type': 'text/xml',
-            'content-length': '1000',
-            'date': 'Mon, 24 Sep 2018 13:38:19 GMT'
-        },
-        'RetryAttempts': 0
-    }
+    ]
 }
+
+describe_db_engine_versions = [
+    {'DBEngineVersions': [{'Engine': 'postgres', 'EngineVersion': '9.3.14', 'DBParameterGroupFamily': 'postgres9.3', 'DBEngineDescription': 'PostgreSQL', 'DBEngineVersionDescription': 'PostgreSQL 9.3.14-R1', 'ValidUpgradeTarget': [{'Engine': 'postgres', 'EngineVersion': '9.3.16', 'Description': 'PostgreSQL 9.3.16-R1', 'AutoUpgrade': False, 'IsMajorVersionUpgrade': False}, {'Engine': 'postgres', 'EngineVersion': '9.3.17', 'Description': ' PostgreSQL 9.3.17-R1', 'AutoUpgrade': False, 'IsMajorVersionUpgrade': False}, {'Engine': 'postgres', 'EngineVersion': '9.3.19', 'Description': 'PostgreSQL 9.3.19-R1', 'AutoUpgrade': False, 'IsMajorVersionUpgrade': False}, {'Engine': 'postgres', 'EngineVersion': '9.3.20', 'AutoUpgrade': True, 'IsMajorVersionUpgrade': False}, {'Engine': 'postgres', 'EngineVersion': '9.3.22', 'Description': 'PostgreSQL 9.3.22-R1', 'AutoUpgrade': False, 'IsMajorVersionUpgrade': False}, {'Engine': 'postgres', 'EngineVersion': '9.3.23', 'AutoUpgrade': False, 'IsMajorVersionUpgrade': False}, {'Engine': 'postgres', 'EngineVersion': '9.4.9', 'AutoUpgrade': False, 'IsMajorVersionUpgrade': True}, {'Engine': 'postgres', 'EngineVersion': '9.4.11', 'Description': 'PostgreSQL 9.4.11-R1', 'AutoUpgrade': False, 'IsMajorVersionUpgrade': True}, {'Engine': 'postgres', 'EngineVersion': '9.4.12', 'Description': 'PostgreSQL 9.4.12-R1', 'AutoUpgrade': False, 'IsMajorVersionUpgrade': True}, {'Engine': 'postgres', 'EngineVersion': '9.4.14', 'Description': 'PostgreSQL 9.4.14-R1', 'AutoUpgrade': False, 'IsMajorVersionUpgrade': True}, {'Engine': 'postgres', 'EngineVersion': '9.4.15', 'AutoUpgrade': False, 'IsMajorVersionUpgrade': True}, {'Engine': 'postgres', 'EngineVersion': '9.4.17', 'Description': 'PostgreSQL 9.4.17-R1', 'AutoUpgrade': False, 'IsMajorVersionUpgrade': True}, {'Engine': 'postgres', 'EngineVersion': '9.4.18', 'AutoUpgrade': False, 'IsMajorVersionUpgrade': True}], 'SupportsLogExportsToCloudwatchLogs': False, 'SupportsReadReplica': True}], 'ResponseMetadata': {'RequestId': '24a4c85a-936b-4418-9c28-c1d9caaabb3f', 'HTTPStatusCode': 200, 'HTTPHeaders': {'x-amzn-requestid': '24a4c85a-936b-4418-9c28-c1d9caaabb3f', 'content-type': 'text/xml', 'content-length': '6234', 'vary': 'Accept-Encoding', 'date': 'Tue, 25 Sep 2018 14:44:56 GMT'}, 'RetryAttempts': 0}},
+    {'DBEngineVersions': [{'Engine': 'postgres', 'EngineVersion': '9.4.18', 'DBParameterGroupFamily': 'postgres9.4', 'DBEngineDescription': 'PostgreSQL', 'DBEngineVersionDescription': 'PostgreSQL 9.4.18-R1', 'ValidUpgradeTarget': [{'Engine': 'postgres', 'EngineVersion': '9.5.13', 'AutoUpgrade': False, 'IsMajorVersionUpgrade': True}], 'SupportsLogExportsToCloudwatchLogs': False, 'SupportsReadReplica': True}], 'ResponseMetadata': {'RequestId': '08d666e3-12f6-40b2-b244-0968694bfa4d', 'HTTPStatusCode': 200, 'HTTPHeaders': {'x-amzn-requestid': '08d666e3-12f6-40b2-b244-0968694bfa4d', 'content-type': 'text/xml', 'content-length': '1394', 'date': 'Tue, 25 Sep 2018 14:44:56 GMT'}, 'RetryAttempts': 0}},
+    {'DBEngineVersions': [{'Engine': 'postgres', 'EngineVersion': '9.5.13', 'DBParameterGroupFamily': 'postgres9.5', 'DBEngineDescription': 'PostgreSQL', 'DBEngineVersionDescription': 'PostgreSQL 9.5.13-R1', 'ValidUpgradeTarget': [{'Engine': 'postgres', 'EngineVersion': '9.6.9', 'AutoUpgrade': False, 'IsMajorVersionUpgrade': True}], 'SupportsLogExportsToCloudwatchLogs': False, 'SupportsReadReplica': True}], 'ResponseMetadata': {'RequestId': 'be018959-e0e5-40f5-9a54-4c6c82068675', 'HTTPStatusCode': 200, 'HTTPHeaders': {'x-amzn-requestid': 'be018959-e0e5-40f5-9a54-4c6c82068675', 'content-type': 'text/xml', 'content-length': '1392', 'date': 'Tue, 25 Sep 2018 14:44:56 GMT'}, 'RetryAttempts': 0}},
+    {'DBEngineVersions': [{'Engine': 'postgres', 'EngineVersion': '9.6.9', 'DBParameterGroupFamily': 'postgres9.6', 'DBEngineDescription': 'PostgreSQL', 'DBEngineVersionDescription': 'PostgreSQL 9.6.9-R1', 'ValidUpgradeTarget': [{'Engine': 'postgres', 'EngineVersion': '10.4', 'AutoUpgrade': False, 'IsMajorVersionUpgrade': True}], 'SupportsLogExportsToCloudwatchLogs': False, 'SupportsReadReplica': True}], 'ResponseMetadata': {'RequestId': '38dc0e02-5c2f-41d3-ba82-819fbf3fbcbc', 'HTTPStatusCode': 200, 'HTTPHeaders': {'x-amzn-requestid': '38dc0e02-5c2f-41d3-ba82-819fbf3fbcbc', 'content-type': 'text/xml', 'content-length': '1387', 'date': 'Tue, 25 Sep 2018 14:44:56 GMT'}, 'RetryAttempts': 0}},
+    {'DBEngineVersions': [{'Engine': 'postgres', 'EngineVersion': '10.4', 'DBParameterGroupFamily': 'postgres10', 'DBEngineDescription': 'PostgreSQL', 'DBEngineVersionDescription': 'PostgreSQL 10.4-R1', 'ValidUpgradeTarget': [], 'SupportsLogExportsToCloudwatchLogs': False, 'SupportsReadReplica': True}], 'ResponseMetadata': {'RequestId': '74f095b3-a065-466d-bee1-0f82d1812d6b', 'HTTPStatusCode': 200, 'HTTPHeaders': {'x-amzn-requestid': '74f095b3-a065-466d-bee1-0f82d1812d6b', 'content-type': 'text/xml', 'content-length': '995', 'date': 'Tue, 25 Sep 2018 14:44:56 GMT'}, 'RetryAttempts': 0}}
+]
