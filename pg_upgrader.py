@@ -55,20 +55,19 @@ class RDSPostgresInstance():
 
         for db_engine_version in db_engine_versions:
             available_major_versions = [
-                valid_upgrade_target["EngineVersion"]
-                for valid_upgrade_target in
+                upgrade_target["EngineVersion"] for upgrade_target in
                 db_engine_version["ValidUpgradeTarget"]
-                if valid_upgrade_target["IsMajorVersionUpgrade"]
+                if upgrade_target["IsMajorVersionUpgrade"]
             ]
             try:
-                newest_major_version = available_major_versions[-1]
-                major_version_upgrades.append(newest_major_version)
+                most_recent_major_version = available_major_versions[-1]
             except IndexError:
                 return major_version_upgrades
             else:
-                # recursive call
+                major_version_upgrades.append(most_recent_major_version)
                 return self._get_upgrade_path(
-                    newest_major_version, upgrade_path=major_version_upgrades
+                    most_recent_major_version,
+                    major_version_upgrades=major_version_upgrades
                 )
 
     def _modify_db(self):
