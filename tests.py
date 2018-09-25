@@ -6,12 +6,12 @@ import boto3
 from moto import mock_rds
 
 from pg_upgrader import (RDSClient, RDSPostgresUpgrader, create_parser)
-from test_fixtures.fixtures import (list_tags_for_resource,
-                                    describe_db_engine_versions,
-                                    test_instance_name_value,
-                                    test_instance_owner_value,
-                                    test_instance_name_key,
-                                    test_instance_owner_key)
+from test_data.fixtures import (list_tags_for_resource,
+                                describe_db_engine_versions,
+                                test_instance_name_value,
+                                test_instance_owner_value,
+                                test_instance_name_key,
+                                test_instance_owner_key)
 
 
 @mock_rds
@@ -43,6 +43,11 @@ class RDSPostgresUpgraderTests(unittest.TestCase):
                     'Value': self.test_instance_owner_value
                 },
             ],
+        )
+
+    def tearDown(self):
+        self.rds_client.delete_db_instance(
+            DBInstanceIdentifier=self.test_instance_id
         )
 
     def test_upgrade_many(self, sleep_mock, describe_db_engine_versions_mock):
