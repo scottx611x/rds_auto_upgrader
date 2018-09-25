@@ -16,6 +16,7 @@ install:
 
 script:
   - coverage run tests.py
+  - python -m doctest -v pg_upgrader.py
 
 after_success:
   - codecov

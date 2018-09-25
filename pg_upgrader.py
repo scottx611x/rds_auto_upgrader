@@ -12,7 +12,18 @@ class RDSClient:
 
 class RDSPostgresWaiter(RDSClient):
     """
+    Context manager that provides the waiting functionality when
+    modifying/upgrading an RDSInstance
 
+    >>> from test_data.utils import make_postgres_instance
+    >>> from moto import mock_rds; mock_rds().start()
+    >>> rds_postgres_instance = make_postgres_instance()
+    >>> with RDSPostgresWaiter("test_id", "9.4.18", sleep_time=0):
+    ...    print("Upgrading soon!")
+    Waiting for test_id to become available
+    Upgrading soon!
+    Upgrading test_id to: 9.4.18
+    Successfully upgraded test_id to: 9.4.18
     """
 
     def __init__(self, db_instance_id, pg_engine_version, sleep_time=30):
@@ -38,9 +49,7 @@ class RDSPostgresWaiter(RDSClient):
 
 
 class RDSPostgresInstance(RDSClient):
-    """
-
-    """
+    """Representation of a single RDS Instance to be upgraded"""
 
     def __init__(self, db_instance_id, target_version=None):
         self.target_version = target_version
@@ -48,13 +57,20 @@ class RDSPostgresInstance(RDSClient):
         self.db_instance_data = self.rds_client.describe_db_instances(
             DBInstanceIdentifier=self.db_instance_id
         )["DBInstances"][0]
+        self.engine_version = self.db_instance_data["EngineVersion"]
         self.upgrade_path = self.get_engine_upgrade_path()
 
     @property
     def is_upgradable(self):
         """
+        Run through checks to determine if we are able to perform the engine
+        version upgrade on a given instance
+        :return: bool
 
-        :return:
+        >>> from test_data.utils import make_postgres_instance
+        >>> rds_postgres_instance = make_postgres_instance()
+        >>> rds_postgres_instance.is_upgradable
+        True
         """
         has_target_version = self.target_version is not None
         if has_target_version:
@@ -63,17 +79,30 @@ class RDSPostgresInstance(RDSClient):
 
     def get_engine_upgrade_path(self):
         """
+        Gather the proper "upgrade path" based on the current Postgres engine
+        version associated with the given RDS Instance.
 
-        :return:
+        For PostgreSQL major version upgrades one has to go from:
+         9.3.x -> 9.4.x -> 9.5.x -> 9.6.x -> 10.x
+
+        See: https://amzn.to/2IdKOel
+
+        :return: list of compatible major engine versions to upgrade to
+
+        >>> from test_data.utils import make_postgres_instance
+        >>> rds_postgres_instance = make_postgres_instance()
+        >>> rds_postgres_instance.get_engine_upgrade_path()
+        ['9.4.18', '9.5.13', '9.6.9', '10.4']
         """
-        return self._get_upgrade_path(self.db_instance_data["EngineVersion"])
+        return self._get_upgrade_path(self.engine_version)
 
     def _get_upgrade_path(self, engine_version, major_version_upgrades=None):
         """
-
-        :param engine_version:
-        :param major_version_upgrades:
-        :return:
+        Traverse AWS API recursively to figure out the valid major version
+        upgrade targets from a given Postgres engine version.
+        :param engine_version: str
+        :param major_version_upgrades: placeholder for recursive calls
+        :return: list of compatible major engine versions to upgrade to
         """
         if major_version_upgrades is None:
             major_version_upgrades = []
@@ -109,8 +138,12 @@ class RDSPostgresInstance(RDSClient):
 
     def _modify_db(self):
         """
+        Perform a major version upgrade (modify_db_instance) for each available
+         major postgres engine version in our self.upgrade_path.
 
-        :return:
+        Note: The RDSPostgresWaiter is crucial in this method as it will
+        ensure that the corresponding AWS RDS Instances are in a state of
+        availability before attempting to modify them.
         """
         for pg_engine_version in self.upgrade_path:
             with RDSPostgresWaiter(self.db_instance_id, pg_engine_version):
@@ -123,8 +156,8 @@ class RDSPostgresInstance(RDSClient):
 
     def upgrade(self):
         """
-
-        :return:
+        Run the _modify_db method within a Thread.
+        :return: the Thread instance running the _modify_db()
         """
         thread = Thread(target=self._modify_db)
         thread.start()
@@ -133,8 +166,14 @@ class RDSPostgresInstance(RDSClient):
     @property
     def uses_postgres(self):
         """
+        Check that the engine of the RDS Instnace we're to upgrade is indeed
+        a Postgres one.
+        :return: bool
 
-        :return:
+        >>> from test_data.utils import make_postgres_instance
+        >>> rds_postgres_instance = make_postgres_instance()
+        >>> rds_postgres_instance.uses_postgres
+        True
         """
         db_engine = self.db_instance_data["Engine"]
         uses_postgres = db_engine == "postgres"
@@ -149,7 +188,9 @@ class RDSPostgresInstance(RDSClient):
 
 class RDSPostgresUpgrader(RDSClient):
     """
-
+    Applys major Postgres engine version upgrades to all user-specified
+    RDS Instances matching the upgradeable criteria
+    (RDSPostgresInstance.is_upgradable)
     """
 
     def __init__(self, ids=None, tags=None, target_version=None):
@@ -164,6 +205,19 @@ class RDSPostgresUpgrader(RDSClient):
         ]
 
     def _get_db_instance_ids_from_tags(self, tags):
+        """
+        Fetch RDS DBInstanceIdentifiers matching the user-specified tags
+        :param tags: dict containing AWS tags that are to be used to gather
+        a list of DBInstanceIdentifiers to be upgraded
+        :return: list of DBInstanceIdentifiers
+
+        >>> from test_data.utils import make_postgres_upgrader
+        >>> postgres_upgrader = make_postgres_upgrader(tags=True)
+        >>> # _get_db_instance_ids_from_tags is run
+        >>> [rds_instance.db_instance_id
+        ...    for rds_instance in postgres_upgrader.rds_instances]
+        ['test_id']
+        """
         matching_instance_ids = set([])
         for db_instance in self.rds_client.describe_db_instances()[
             "DBInstances"
@@ -179,19 +233,12 @@ class RDSPostgresUpgrader(RDSClient):
         return list(matching_instance_ids)
 
     def upgrade_all(self):
-        """
-
-        """
         for rds_instance in self.rds_instances:
             upgrade_thread = rds_instance.upgrade()
             upgrade_thread.join()
 
 
 def create_parser():
-    """
-
-    :return:
-    """
     parser = argparse.ArgumentParser(
         description='Gather RDSPostgresUpgrader configurables.'
     )
