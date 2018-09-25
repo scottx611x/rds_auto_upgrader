@@ -7,7 +7,7 @@ python:
   - "3.7-dev"
 
 env:
-  - AWS_DEFAULT_REGION=xxxx
+  - AWS_DEFAULT_REGION=us-east-1
 
 install:
   - pip install codecov coverage
