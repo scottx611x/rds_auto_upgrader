@@ -91,7 +91,7 @@ class RDSPostgresInstance(RDSClient):
 
         >>> from test_data.utils import make_postgres_instance
         >>> rds_postgres_instance = make_postgres_instance()
-        >>> rds_postgres_instance.get_engine_upgrade_path()
+        >>> rds_postgres_instance.upgrade_path
         ['9.4.18', '9.5.13', '9.6.9', '10.4']
         """
         return self._get_upgrade_path(self.engine_version)
