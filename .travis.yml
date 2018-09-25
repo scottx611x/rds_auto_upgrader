@@ -7,9 +7,6 @@ python:
   - "3.6"
   - "3.7-dev"
 
-env:
-  - AWS_DEFAULT_REGION=xxxx AWS_ACCESS_KEY_ID=xxxx AWS_SECRET_ACCESS_KEY=xxxx
-
 install:
   - pip install codecov coverage
   - pip install -r requirements.txt
