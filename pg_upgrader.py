@@ -42,11 +42,24 @@ class RDSPostgresInstance(RDSClient):
 
     """
 
-    def __init__(self, db_instance_id):
+    def __init__(self, db_instance_id, target_version=None):
+        self.target_version = target_version
         self.db_instance_id = db_instance_id
         self.db_instance_data = self.rds_client.describe_db_instances(
             DBInstanceIdentifier=self.db_instance_id
         )["DBInstances"][0]
+        self.upgrade_path = self.get_engine_upgrade_path()
+
+    @property
+    def is_upgradable(self):
+        """
+
+        :return:
+        """
+        has_target_version = self.target_version is not None
+        if has_target_version:
+            return self.uses_postgres and (self.target_version in self.upgrade_path)
+        return self.uses_postgres
 
     def get_engine_upgrade_path(self):
         """
@@ -75,6 +88,14 @@ class RDSPostgresInstance(RDSClient):
                 db_engine_version["ValidUpgradeTarget"]
                 if upgrade_target["IsMajorVersionUpgrade"]
             ]
+            if self.target_version in available_major_versions:
+                print(
+                    "Target version: {} found in available_major_versions: {}"
+                    .format(self.target_version, available_major_versions)
+                )
+                major_version_upgrades.append(self.target_version)
+                return major_version_upgrades
+
             try:
                 most_recent_major_version = available_major_versions[-1]
             except IndexError:
@@ -91,7 +112,7 @@ class RDSPostgresInstance(RDSClient):
 
         :return:
         """
-        for pg_engine_version in self.get_engine_upgrade_path():
+        for pg_engine_version in self.upgrade_path:
             with RDSPostgresWaiter(self.db_instance_id, pg_engine_version):
                 self.rds_client.modify_db_instance(
                     DBInstanceIdentifier=self.db_instance_id,
@@ -131,14 +152,15 @@ class RDSPostgresUpgrader(RDSClient):
 
     """
 
-    def __init__(self, ids=None, tags=None):
+    def __init__(self, ids=None, tags=None, target_version=None):
         if tags is not None:
             ids = self._get_db_instance_ids_from_tags(tags)
-        rds_instances = [
-            RDSPostgresInstance(db_instance_id) for db_instance_id in ids
-        ]
         self.rds_instances = [
-            instance for instance in rds_instances if instance.uses_postgres
+            instance for instance in [
+                RDSPostgresInstance(db_instance_id,
+                                    target_version=target_version)
+                for db_instance_id in ids
+            ] if instance.is_upgradable
         ]
 
     def _get_db_instance_ids_from_tags(self, tags):
@@ -182,13 +204,20 @@ def create_parser():
         '-tags', '--rds_db_instance_tags', type=json.loads,
         help='Tags of RDS DBInstances to target for an upgrade'
     )
+    parser.add_argument(
+        "-v", "--targeted_major_version", type=str,
+        help='Postgres major DBEngineVersion to target for the upgrade'
+    )
     return parser
 
 
 def main():
     args = create_parser().parse_args()
-    RDSPostgresUpgrader(ids=args.rds_db_instance_ids,
-                        tags=args.rds_db_instance_tags).upgrade_all()
+    RDSPostgresUpgrader(
+        ids=args.rds_db_instance_ids,
+        tags=args.rds_db_instance_tags,
+        target_version=args.targeted_major_version
+    ).upgrade_all()
 
 
 if __name__ == '__main__':
