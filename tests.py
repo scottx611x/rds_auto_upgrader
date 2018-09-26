@@ -98,9 +98,7 @@ class RDSPostgresUpgraderTests(unittest.TestCase):
                 "10.4"
             )
 
-    def test_upgrade_after_parse_ids(
-            self, sleep_mock, describe_db_engine_versions_mock
-    ):
+    def test_upgrade_after_parse_ids(self, *args):
         parser = create_parser()
         args = parser.parse_args(['-ids', test_instance_id])
         rds_postgres_upgrader = RDSPostgresUpgrader(
@@ -114,9 +112,7 @@ class RDSPostgresUpgraderTests(unittest.TestCase):
             "10.4"
         )
 
-    def test_upgrade_after_parse_tags(
-            self, sleep_mock, describe_db_engine_versions_mock
-    ):
+    def test_upgrade_after_parse_tags(self, *args):
         parser = create_parser()
         args = parser.parse_args(['-tags', json.dumps(test_tags)])
         with mock.patch.object(rds_client, "list_tags_for_resource",
@@ -132,9 +128,7 @@ class RDSPostgresUpgraderTests(unittest.TestCase):
             "10.4"
         )
 
-    def test_upgrade_to_user_specified_target_version(
-            self, sleep_mock, describe_db_engine_versions_mock
-    ):
+    def test_upgrade_to_user_specified_target_version(self, *args):
         target_version = "9.5.13"
         rds_postgres_upgrader = RDSPostgresUpgrader(
             ids=[test_instance_id],
@@ -148,9 +142,7 @@ class RDSPostgresUpgraderTests(unittest.TestCase):
             target_version
         )
 
-    def test_upgrade_to_user_specified_target_version_version_not_found(
-            self, sleep_mock, describe_db_engine_versions_mock
-    ):
+    def test_upgrade_to_user_specified_target_version_version_not_found(self, *args):
         target_version = "96.9"
         rds_postgres_upgrader = RDSPostgresUpgrader(
             ids=[test_instance_id],
@@ -159,9 +151,7 @@ class RDSPostgresUpgraderTests(unittest.TestCase):
         rds_postgres_upgrader.upgrade_all()
         self.assertEqual(len(rds_postgres_upgrader.rds_instances), 0)
 
-    def test_nothing_upgraded_after_parsed_tags_not_matched(
-            self, sleep_mock, describe_db_engine_versions_mock
-    ):
+    def test_nothing_upgraded_after_parsed_tags_not_matched(self, *args):
         parser = create_parser()
         args = parser.parse_args(
             ['-tags',
@@ -175,9 +165,7 @@ class RDSPostgresUpgraderTests(unittest.TestCase):
             rds_postgres_upgrader.upgrade_all()
         self.assertEqual(len(rds_postgres_upgrader.rds_instances), 0)
 
-    def test_nothing_upgraded_if_postgres_engine_not_found(
-            self, sleep_mock, describe_db_engine_versions_mock
-    ):
+    def test_nothing_upgraded_if_postgres_engine_not_found(self, *args):
         mysql_instance_id = "test-mysql"
         self.rds_client.create_db_instance(
             AllocatedStorage=10,
