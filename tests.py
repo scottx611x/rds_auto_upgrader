@@ -5,7 +5,7 @@ from unittest import mock
 import boto3
 from moto import mock_rds
 
-from pg_upgrader import (RDSClient, RDSPostgresUpgrader, create_parser)
+from pg_upgrader import (RDSPostgresUpgrader, create_parser, rds_client)
 from test_data.fixtures import (list_tags_for_resource,
                                 describe_db_engine_versions,
                                 test_instance_name_value,
@@ -16,7 +16,7 @@ from test_data.fixtures import (list_tags_for_resource,
 
 @mock_rds
 @mock.patch.object(
-    RDSClient.rds_client, "describe_db_engine_versions",
+    rds_client, "describe_db_engine_versions",
     side_effect=describe_db_engine_versions
 )
 @mock.patch("time.sleep")
@@ -109,7 +109,7 @@ class RDSPostgresUpgraderTests(unittest.TestCase):
              )
             ]
         )
-        with mock.patch.object(RDSClient.rds_client, "list_tags_for_resource",
+        with mock.patch.object(rds_client, "list_tags_for_resource",
                                return_value=list_tags_for_resource):
             rds_postgres_upgrader = RDSPostgresUpgrader(
                 tags=args.rds_db_instance_tags
@@ -157,7 +157,7 @@ class RDSPostgresUpgraderTests(unittest.TestCase):
             ['-tags',
              '{"Name": "Bad Tag Value", "owner": "test@example.com"}']
         )
-        with mock.patch.object(RDSClient.rds_client, "list_tags_for_resource",
+        with mock.patch.object(rds_client, "list_tags_for_resource",
                                return_value=list_tags_for_resource):
             rds_postgres_upgrader = RDSPostgresUpgrader(
                 tags=args.rds_db_instance_tags

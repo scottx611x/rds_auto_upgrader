@@ -6,11 +6,10 @@ import time
 import boto3
 
 
-class RDSClient:
-    rds_client = boto3.client('rds')
+rds_client = boto3.client('rds')
 
 
-class RDSPostgresWaiter(RDSClient):
+class RDSPostgresWaiter:
     """
     Context manager that provides the waiting functionality when
     modifying/upgrading an RDSInstance
@@ -32,7 +31,7 @@ class RDSPostgresWaiter(RDSClient):
         self.sleep_time = sleep_time
 
     def __enter__(self):
-        self.rds_client.get_waiter("db_instance_available").wait(
+        rds_client.get_waiter("db_instance_available").wait(
             DBInstanceIdentifier=self.instance_id
         )
         print("Waiting for {} to become available".format(self.instance_id))
@@ -41,20 +40,20 @@ class RDSPostgresWaiter(RDSClient):
         print("Upgrading {} to: {}"
               .format(self.instance_id, self.engine_version))
         time.sleep(self.sleep_time)
-        self.rds_client.get_waiter("db_instance_available").wait(
+        rds_client.get_waiter("db_instance_available").wait(
             DBInstanceIdentifier=self.instance_id
         )
         print("Successfully upgraded {} to: {}"
               .format(self.instance_id, self.engine_version))
 
 
-class RDSPostgresInstance(RDSClient):
+class RDSPostgresInstance:
     """Representation of a single RDS Instance to be upgraded"""
 
     def __init__(self, db_instance_id, target_version=None):
         self.target_version = target_version
         self.db_instance_id = db_instance_id
-        self.db_instance_data = self.rds_client.describe_db_instances(
+        self.db_instance_data = rds_client.describe_db_instances(
             DBInstanceIdentifier=self.db_instance_id
         )["DBInstances"][0]
         self.engine_version = self.db_instance_data["EngineVersion"]
@@ -107,7 +106,7 @@ class RDSPostgresInstance(RDSClient):
         if major_version_upgrades is None:
             major_version_upgrades = []
 
-        db_engine_versions = self.rds_client.describe_db_engine_versions(
+        db_engine_versions = rds_client.describe_db_engine_versions(
             Engine='postgres', EngineVersion=engine_version
         )["DBEngineVersions"]
 
@@ -147,7 +146,7 @@ class RDSPostgresInstance(RDSClient):
         """
         for pg_engine_version in self.upgrade_path:
             with RDSPostgresWaiter(self.db_instance_id, pg_engine_version):
-                self.rds_client.modify_db_instance(
+                rds_client.modify_db_instance(
                     DBInstanceIdentifier=self.db_instance_id,
                     EngineVersion=pg_engine_version,
                     AllowMajorVersionUpgrade=True,
@@ -186,7 +185,7 @@ class RDSPostgresInstance(RDSClient):
         return uses_postgres
 
 
-class RDSPostgresUpgrader(RDSClient):
+class RDSPostgresUpgrader:
     """
     Applys major Postgres engine version upgrades to all user-specified
     RDS Instances matching the upgradeable criteria
@@ -219,10 +218,10 @@ class RDSPostgresUpgrader(RDSClient):
         ['test_id']
         """
         matching_instance_ids = set([])
-        for db_instance in self.rds_client.describe_db_instances()[
+        for db_instance in rds_client.describe_db_instances()[
             "DBInstances"
         ]:
-            tag_list = self.rds_client.list_tags_for_resource(
+            tag_list = rds_client.list_tags_for_resource(
                 ResourceName=db_instance["DBInstanceArn"]
             )["TagList"]
 
