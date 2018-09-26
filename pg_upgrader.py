@@ -5,7 +5,6 @@ import time
 
 import boto3
 
-
 rds_client = boto3.client('rds')
 
 
@@ -14,15 +13,16 @@ class RDSPostgresWaiter:
     Context manager that provides the waiting functionality when
     modifying/upgrading an RDSInstance
 
-    >>> from test_data.utils import make_postgres_instance
     >>> from moto import mock_rds; mock_rds().start()
-    >>> rds_postgres_instance = make_postgres_instance()
-    >>> with RDSPostgresWaiter("test_id", "9.4.18", sleep_time=0):
+    >>> from test_data.utils import make_postgres_instance
+    >>> make_postgres_instance()
+    RDSPostgresInstance id: test-rds-id status: available engine_version: 9.3.14
+    >>> with RDSPostgresWaiter("test-rds-id", "9.4.18", sleep_time=0):
     ...    print("Upgrading soon!")
-    Waiting for test_id to become available
+    Waiting for test-rds-id to become available
     Upgrading soon!
-    Upgrading test_id to: 9.4.18
-    Successfully upgraded test_id to: 9.4.18
+    Upgrading test-rds-id to: 9.4.18
+    Successfully upgraded test-rds-id to: 9.4.18
     """
 
     def __init__(self, db_instance_id, pg_engine_version, sleep_time=30):
@@ -53,11 +53,24 @@ class RDSPostgresInstance:
     def __init__(self, db_instance_id, target_version=None):
         self.target_version = target_version
         self.db_instance_id = db_instance_id
-        self.db_instance_data = rds_client.describe_db_instances(
-            DBInstanceIdentifier=self.db_instance_id
-        )["DBInstances"][0]
+        self.db_instance_data = self._get_db_instance_data()
         self.engine_version = self.db_instance_data["EngineVersion"]
         self.upgrade_path = self.get_engine_upgrade_path()
+
+    def __repr__(self):
+        return ("RDSPostgresInstance id: {} status: {} engine_version: {}"
+                .format(self.db_instance_id, self.db_instance_status,
+                    self.engine_version, self.target_version,
+                    self.upgrade_path))
+
+    def _get_db_instance_data(self):
+        return rds_client.describe_db_instances(
+            DBInstanceIdentifier=self.db_instance_id
+        )["DBInstances"][0]
+
+    @property
+    def db_instance_status(self):
+        return self._get_db_instance_data()["DBInstanceStatus"]
 
     @property
     def is_upgradable(self):
@@ -73,7 +86,8 @@ class RDSPostgresInstance:
         """
         has_target_version = self.target_version is not None
         if has_target_version:
-            return self.uses_postgres and (self.target_version in self.upgrade_path)
+            return self.uses_postgres and (
+                        self.target_version in self.upgrade_path)
         return self.uses_postgres
 
     def get_engine_upgrade_path(self):
@@ -119,7 +133,7 @@ class RDSPostgresInstance:
             if self.target_version in available_major_versions:
                 print(
                     "Target version: {} found in available_major_versions: {}"
-                    .format(self.target_version, available_major_versions)
+                        .format(self.target_version, available_major_versions)
                 )
                 major_version_upgrades.append(self.target_version)
                 return major_version_upgrades
@@ -180,7 +194,7 @@ class RDSPostgresInstance:
             print(
                 "Excluding DB instance: {} as it does not use postgres."
                 " DB Engine: '{}' was reported"
-                .format(self.db_instance_id, db_engine)
+                    .format(self.db_instance_id, db_engine)
             )
         return uses_postgres
 
@@ -215,7 +229,7 @@ class RDSPostgresUpgrader:
         >>> # _get_db_instance_ids_from_tags is run
         >>> [rds_instance.db_instance_id
         ...    for rds_instance in postgres_upgrader.rds_instances]
-        ['test_id']
+        ['test-rds-id']
         """
         matching_instance_ids = set([])
         for db_instance in rds_client.describe_db_instances()[

@@ -7,11 +7,33 @@ from moto import mock_rds
 
 from pg_upgrader import (RDSPostgresUpgrader, create_parser, rds_client)
 from test_data.fixtures import (list_tags_for_resource,
-                                describe_db_engine_versions,
-                                test_instance_name_value,
-                                test_instance_owner_value,
+                                describe_db_engine_versions, test_instance_id,
                                 test_instance_name_key,
-                                test_instance_owner_key)
+                                test_instance_owner_key,
+                                test_instance_name_value,
+                                test_instance_owner_value, test_tags)
+from test_data.utils import make_postgres_instance
+
+
+@mock_rds
+@mock.patch.object(
+    rds_client, "describe_db_engine_versions",
+    side_effect=describe_db_engine_versions
+)
+class RDSPostgresInstanceTests(unittest.TestCase):
+    def setUp(self):
+        self.postgres_instance = make_postgres_instance()
+
+    def test_repr(self, describe_db_engine_versions_mock):
+        self.assertEqual(
+            str(self.postgres_instance),
+            "RDSPostgresInstance id: test-rds-id status: available "
+            "engine_version: 9.3.14"
+        )
+
+    def test_upgrade_path(self, describe_db_engine_versions_mock):
+        self.assertEqual(self.postgres_instance.upgrade_path,
+                         ['9.4.18', '9.5.13', '9.6.9', '10.4'])
 
 
 @mock_rds
@@ -23,31 +45,28 @@ from test_data.fixtures import (list_tags_for_resource,
 class RDSPostgresUpgraderTests(unittest.TestCase):
     def setUp(self):
         self.rds_client = boto3.client("rds")
-        self.test_instance_name_value = test_instance_name_value
-        self.test_instance_owner_value = test_instance_owner_value
-        self.test_instance_id = "test-rds-id"
         self.rds_client.create_db_instance(
             AllocatedStorage=10,
-            DBName=self.test_instance_name_value,
-            DBInstanceIdentifier=self.test_instance_id,
+            DBName=test_instance_name_value,
+            DBInstanceIdentifier=test_instance_id,
             DBInstanceClass="db.t2.small",
             Engine="postgres",
             EngineVersion="9.3.14",
             Tags=[
                 {
                     'Key': test_instance_name_key,
-                    'Value': self.test_instance_name_value
+                    'Value': test_instance_name_value
                 },
                 {
                     'Key': test_instance_owner_key,
-                    'Value': self.test_instance_owner_value
+                    'Value': test_instance_owner_value
                 },
             ],
         )
 
     def tearDown(self):
         self.rds_client.delete_db_instance(
-            DBInstanceIdentifier=self.test_instance_id
+            DBInstanceIdentifier=test_instance_id
         )
 
     def test_upgrade_many(self, sleep_mock, describe_db_engine_versions_mock):
@@ -62,7 +81,7 @@ class RDSPostgresUpgraderTests(unittest.TestCase):
             Engine="postgres",
             EngineVersion="9.3.14"
         )
-        instance_ids_to_upgrade = [self.test_instance_id, another_instance_id]
+        instance_ids_to_upgrade = [test_instance_id, another_instance_id]
         rds_postgres_upgrader = RDSPostgresUpgrader(
             ids=instance_ids_to_upgrade
         )
@@ -83,14 +102,14 @@ class RDSPostgresUpgraderTests(unittest.TestCase):
             self, sleep_mock, describe_db_engine_versions_mock
     ):
         parser = create_parser()
-        args = parser.parse_args(['-ids', self.test_instance_id])
+        args = parser.parse_args(['-ids', test_instance_id])
         rds_postgres_upgrader = RDSPostgresUpgrader(
             ids=args.rds_db_instance_ids
         )
         rds_postgres_upgrader.upgrade_all()
         self.assertEqual(
             self.rds_client.describe_db_instances(
-                DBInstanceIdentifier=self.test_instance_id
+                DBInstanceIdentifier=test_instance_id
             )["DBInstances"][0]["EngineVersion"],
             "10.4"
         )
@@ -99,16 +118,7 @@ class RDSPostgresUpgraderTests(unittest.TestCase):
             self, sleep_mock, describe_db_engine_versions_mock
     ):
         parser = create_parser()
-        args = parser.parse_args(
-            ['-tags',
-             json.dumps(
-                 {
-                     d['Key']: d['Value']
-                     for d in list_tags_for_resource['TagList']
-                 }
-             )
-            ]
-        )
+        args = parser.parse_args(['-tags', json.dumps(test_tags)])
         with mock.patch.object(rds_client, "list_tags_for_resource",
                                return_value=list_tags_for_resource):
             rds_postgres_upgrader = RDSPostgresUpgrader(
@@ -117,7 +127,7 @@ class RDSPostgresUpgraderTests(unittest.TestCase):
             rds_postgres_upgrader.upgrade_all()
         self.assertEqual(
             self.rds_client.describe_db_instances(
-                DBInstanceIdentifier=self.test_instance_id
+                DBInstanceIdentifier=test_instance_id
             )["DBInstances"][0]["EngineVersion"],
             "10.4"
         )
@@ -127,13 +137,13 @@ class RDSPostgresUpgraderTests(unittest.TestCase):
     ):
         target_version = "9.5.13"
         rds_postgres_upgrader = RDSPostgresUpgrader(
-            ids=[self.test_instance_id],
+            ids=[test_instance_id],
             target_version=target_version
         )
         rds_postgres_upgrader.upgrade_all()
         self.assertEqual(
             self.rds_client.describe_db_instances(
-                DBInstanceIdentifier=self.test_instance_id
+                DBInstanceIdentifier=test_instance_id
             )["DBInstances"][0]["EngineVersion"],
             target_version
         )
@@ -143,7 +153,7 @@ class RDSPostgresUpgraderTests(unittest.TestCase):
     ):
         target_version = "96.9"
         rds_postgres_upgrader = RDSPostgresUpgrader(
-            ids=[self.test_instance_id],
+            ids=[test_instance_id],
             target_version=target_version
         )
         rds_postgres_upgrader.upgrade_all()
@@ -185,6 +195,7 @@ class RDSPostgresUpgraderTests(unittest.TestCase):
         self.rds_client.delete_db_instance(
             DBInstanceIdentifier=mysql_instance_id
         )
+
 
 if __name__ == '__main__':
     unittest.main()

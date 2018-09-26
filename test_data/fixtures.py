@@ -1,9 +1,11 @@
 # coding=utf-8
 
+test_instance_id = "test-rds-id"
 test_instance_name_key = "Name"
 test_instance_owner_key = "owner"
 test_instance_name_value = "test-rds-name"
 test_instance_owner_value = "test@example.com"
+
 
 list_tags_for_resource = {
     'TagList': [
@@ -16,6 +18,11 @@ list_tags_for_resource = {
             'Value': test_instance_owner_value
         }
     ]
+}
+
+test_tags = {
+    d['Key']: d['Value']
+    for d in list_tags_for_resource['TagList']
 }
 
 describe_db_engine_versions = [
