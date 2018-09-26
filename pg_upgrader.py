@@ -131,10 +131,9 @@ class RDSPostgresInstance:
                 if upgrade_target["IsMajorVersionUpgrade"]
             ]
             if self.target_version in available_major_versions:
-                print(
-                    "Target version: {} found in available_major_versions: {}"
-                        .format(self.target_version, available_major_versions)
-                )
+                print("Target version: {} found in "
+                      "available_major_versions: {}".format(
+                       self.target_version, available_major_versions))
                 major_version_upgrades.append(self.target_version)
                 return major_version_upgrades
 
