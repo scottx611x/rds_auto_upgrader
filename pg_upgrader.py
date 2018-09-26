@@ -84,10 +84,10 @@ class RDSPostgresInstance:
         >>> rds_postgres_instance.is_upgradable
         True
         """
-        has_target_version = self.target_version is not None
-        if has_target_version:
+        if self.target_version is not None:
             return self.uses_postgres and (
-                        self.target_version in self.upgrade_path)
+                self.target_version in self.upgrade_path
+            )
         return self.uses_postgres
 
     def get_engine_upgrade_path(self):
