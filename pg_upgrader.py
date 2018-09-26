@@ -60,8 +60,8 @@ class RDSPostgresInstance:
     def __repr__(self):
         return ("RDSPostgresInstance id: {} status: {} engine_version: {}"
                 .format(self.db_instance_id, self.db_instance_status,
-                    self.engine_version, self.target_version,
-                    self.upgrade_path))
+                        self.engine_version, self.target_version,
+                        self.upgrade_path))
 
     def _get_db_instance_data(self):
         return rds_client.describe_db_instances(
