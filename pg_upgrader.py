@@ -146,7 +146,7 @@ class RDSPostgresInstance:
                 return self._get_upgrade_path(
                     most_recent_major_version,
                     major_version_upgrades=major_version_upgrades
-                )
+                )  # recursive call
 
     def _modify_db(self):
         """
