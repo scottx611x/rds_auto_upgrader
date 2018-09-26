@@ -4,11 +4,12 @@ from threading import Thread
 import time
 
 import boto3
+from botocore.waiter import Waiter
 
 rds_client = boto3.client('rds')
 
 
-class RDSPostgresWaiter:
+class RDSPostgresWaiter(Waiter):
     """
     Context manager that provides the waiting functionality when
     modifying/upgrading an RDSInstance
@@ -19,22 +20,37 @@ class RDSPostgresWaiter:
     RDSPostgresInstance id: test-rds-id status: available engine_version: 9.3.14
     >>> with RDSPostgresWaiter("test-rds-id", "9.4.18", sleep_time=0):
     ...    print("Upgrading soon!")
-    Waiting for test-rds-id to become available
+    Polling: test-rds-id for availability...
+    Status of: test-rds-id is: available
     Upgrading soon!
     Upgrading test-rds-id to: 9.4.18
     Successfully upgraded test-rds-id to: 9.4.18
     """
+
+    rds_waiter = rds_client.get_waiter("db_instance_available")
 
     def __init__(self, db_instance_id, pg_engine_version, sleep_time=30):
         self.engine_version = pg_engine_version
         self.instance_id = db_instance_id
         self.sleep_time = sleep_time
 
-    def __enter__(self):
-        rds_client.get_waiter("db_instance_available").wait(
-            DBInstanceIdentifier=self.instance_id
+        def wait_with_status_reporting(**kwargs):
+            print("Polling: {} for availability...".format(self.instance_id))
+            response = self.rds_waiter._operation_method(**kwargs)
+            print("Status of: {} is: {}".format(
+                self.instance_id,
+                response["DBInstances"][0]["DBInstanceStatus"]
+            ))
+            return response
+
+        super(RDSPostgresWaiter, self).__init__(
+            self.rds_waiter.name,
+            self.rds_waiter.config,
+            wait_with_status_reporting
         )
-        print("Waiting for {} to become available".format(self.instance_id))
+
+    def __enter__(self):
+        self.wait(DBInstanceIdentifier=self.instance_id)
 
     def __exit__(self, type, value, traceback):
         print("Upgrading {} to: {}"
