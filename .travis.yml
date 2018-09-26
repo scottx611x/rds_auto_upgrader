@@ -1,0 +1,22 @@
+language: python
+cache: pip
+
+python:
+  - "3.4"
+  - "3.5"
+  - "3.6"
+  - "3.7-dev"
+
+env:
+  - AWS_DEFAULT_REGION=us-east-1 AWS_ACCESS_KEY_ID=xxxx AWS_SECRET_ACCESS_KEY=xxxx
+
+install:
+  - pip install codecov coverage
+  - pip install -r requirements.txt
+
+script:
+  - coverage run tests.py
+  - python -m doctest -v pg_upgrader.py
+
+after_success:
+  - codecov
