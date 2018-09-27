@@ -11,13 +11,13 @@
 ### Examples:
 
 - **Upgrade many RDS instances to their latest available major version by DbInstanceIdentifers**:
-    - `python pg_upgrader.py -ids my-cool-db-a my-cool-db-b`
+    - `python upgrade.py -ids my-cool-db-a my-cool-db-b`
 
 - **Upgrade many RDS instances to their latest available major version by DbInstanceTags**:
-    - `python pg_upgrader.py -tags {"Name": "test-rds-name", "owner": "test@example.com"}`
+    - `python upgrade.py -tags {"Name": "test-rds-name", "owner": "test@example.com"}`
 
 - **Upgrade a single RDS instance to a specific major version by DbInstanceIdentifer**:
-    - `python pg_upgrader.py -ids my-cool-db-a -v 9.6.9`
+    - `python upgrade.py -ids my-cool-db-a -v 9.6.9`
 
 ### Running Tests:
 - `python tests.py`
