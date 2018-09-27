@@ -1,7 +1,7 @@
 from unittest import mock
 
 import boto3
-from moto import mock_rds
+from moto import mock_rds2
 from models import RDSPostgresInstance, RDSPostgresUpgrader, rds_client
 from test_data.fixtures import describe_db_engine_versions, \
     list_tags_for_resource, test_instance_id, test_instance_name_value, \
@@ -9,7 +9,7 @@ from test_data.fixtures import describe_db_engine_versions, \
     test_tags
 
 
-@mock_rds
+@mock_rds2
 def make_rds_instance(db_instance_identifier=test_instance_id):
     boto3.client("rds").create_db_instance(
         AllocatedStorage=10,
@@ -32,7 +32,7 @@ def make_rds_instance(db_instance_identifier=test_instance_id):
     return db_instance_identifier
 
 
-@mock_rds
+@mock_rds2
 @mock.patch.object(
     rds_client, "describe_db_engine_versions",
     side_effect=describe_db_engine_versions
@@ -41,7 +41,7 @@ def make_postgres_instance(describe_db_engine_versions_mock):
     return RDSPostgresInstance(make_rds_instance())
 
 
-@mock_rds
+@mock_rds2
 @mock.patch.object(
     rds_client, "describe_db_engine_versions",
     side_effect=describe_db_engine_versions
