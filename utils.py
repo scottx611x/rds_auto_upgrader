@@ -68,8 +68,6 @@ class RDSPostgresWaiter:
         print("Upgrading {} to: {}"
               .format(self.instance_id, self.engine_version))
         time.sleep(self.sleep_time)
-        self.client.get_waiter("db_instance_available").wait(
-            DBInstanceIdentifier=self.instance_id
-        )
+        self.rds_waiter.wait(DBInstanceIdentifier=self.instance_id)
         print("Successfully upgraded {} to: {}"
               .format(self.instance_id, self.engine_version))
