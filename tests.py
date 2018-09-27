@@ -25,14 +25,14 @@ class RDSPostgresInstanceTests(unittest.TestCase):
     def setUp(self):
         self.postgres_instance = make_postgres_instance()
 
-    def test_repr(self, describe_db_engine_versions_mock):
+    def test_repr(self, *args):
         self.assertEqual(
             str(self.postgres_instance),
             "RDSPostgresInstance id: test-rds-id status: available "
             "engine_version: 9.3.14"
         )
 
-    def test_upgrade_path(self, describe_db_engine_versions_mock):
+    def test_upgrade_path(self, *args):
         self.assertEqual(self.postgres_instance.upgrade_path,
                          ['9.4.18', '9.5.13', '9.6.9', '10.4'])
 
