@@ -33,7 +33,7 @@ class RDSPostgresWaiter:
     RDSPostgresInstance id: test-rds-id status: available engine_version: 9.3.14
     >>> with RDSPostgresWaiter(rds_client, "test-rds-id", "9.4.18", sleep_time=0):
     ...    print("Upgrading soon!")
-    Polling: test-rds-id for availability...
+    Polling: test-rds-id for availability
     Status of: test-rds-id is: available
     Upgrading soon!
     Upgrading test-rds-id to: 9.4.18
