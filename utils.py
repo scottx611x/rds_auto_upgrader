@@ -37,6 +37,8 @@ class RDSPostgresWaiter:
     Status of: test-rds-id is: available
     Upgrading soon!
     Upgrading test-rds-id to: 9.4.18
+    Polling: test-rds-id for availability
+    Status of: test-rds-id is: available
     Successfully upgraded test-rds-id to: 9.4.18
     """
     def __init__(self, client, db_instance_id, pg_engine_version, sleep_time=60):
