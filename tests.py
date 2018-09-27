@@ -12,7 +12,8 @@ from test_data.fixtures import (list_tags_for_resource,
                                 test_instance_name_key,
                                 test_instance_owner_key,
                                 test_instance_name_value,
-                                test_instance_owner_value, test_tags)
+                                test_instance_owner_value, test_tags,
+                                describe_db_instances)
 from test_data.utils import make_postgres_instance
 from upgrade import create_parser
 
@@ -93,12 +94,7 @@ class RDSPostgresUpgraderTests(unittest.TestCase):
             len(describe_db_engine_versions) * len(instance_ids_to_upgrade)
         )
         for rds_instance in rds_postgres_upgrader.rds_instances:
-            self.assertEqual(
-                self.rds_client.describe_db_instances(
-                    DBInstanceIdentifier=rds_instance.db_instance_id
-                )["DBInstances"][0]["EngineVersion"],
-                "10.4"
-            )
+            self.assertEqual(rds_instance.engine_version, "10.4")
 
     def test_upgrade_after_parse_ids(self, *args):
         parser = create_parser()
@@ -123,12 +119,8 @@ class RDSPostgresUpgraderTests(unittest.TestCase):
                 tags=args.rds_db_instance_tags
             )
             rds_postgres_upgrader.upgrade_all()
-        self.assertEqual(
-            self.rds_client.describe_db_instances(
-                DBInstanceIdentifier=test_instance_id
-            )["DBInstances"][0]["EngineVersion"],
-            "10.4"
-        )
+        for rds_instance in rds_postgres_upgrader.rds_instances:
+            self.assertEqual(rds_instance.engine_version, "10.4")
 
     def test_upgrade_to_user_specified_target_version(self, *args):
         target_version = "9.5.13"
@@ -167,6 +159,23 @@ class RDSPostgresUpgraderTests(unittest.TestCase):
             rds_postgres_upgrader.upgrade_all()
         self.assertEqual(len(rds_postgres_upgrader.rds_instances), 0)
 
+    def test_upgrade_handles_different_db_instance_statuses(self, *args):
+        with mock.patch.object(
+            rds_client, "describe_db_instances",
+            side_effect=[
+                describe_db_instances(status=status)
+                for status in ["upgrading", "upgrading", "upgrading",
+                               "modifying", "backing-up", "available",
+                               "available"]
+            ]
+        ):
+            rds_postgres_upgrader = RDSPostgresUpgrader(
+                ids=[test_instance_id], target_version="9.4.18"
+            )
+            rds_postgres_upgrader.upgrade_all()
+        for rds_instance in rds_postgres_upgrader.rds_instances:
+            self.assertEqual(rds_instance.engine_version, "9.4.18")
+
     def test_nothing_upgraded_if_postgres_engine_not_found(self, *args):
         mysql_instance_id = "test-mysql"
         self.rds_client.create_db_instance(
@@ -188,10 +197,8 @@ class RDSPostgresUpgraderTests(unittest.TestCase):
 
     def test_nothing_upgraded_if_postgres_engine_never_available(self, *args):
         self.rds_client.stop_db_instance(DBInstanceIdentifier=test_instance_id)
-        RDSPostgresUpgrader(
-            ids=[test_instance_id],
-            target_version="9.4.18"
-        ).upgrade_all()
+        RDSPostgresUpgrader(ids=[test_instance_id],
+                            target_version="9.4.18").upgrade_all()
         self.assertEqual(
             self.rds_client.describe_db_instances(
                 DBInstanceIdentifier=test_instance_id
