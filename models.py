@@ -12,7 +12,6 @@ class RDSPostgresInstance:
         self.target_version = target_version
         self.db_instance_id = db_instance_id
         self.db_instance_data = self._get_db_instance_data()
-        self.engine_version = self.db_instance_data["EngineVersion"]
         self.upgrade_path = self.get_engine_upgrade_path()
 
     def __repr__(self):
@@ -29,6 +28,10 @@ class RDSPostgresInstance:
     @property
     def db_instance_status(self):
         return self._get_db_instance_data()["DBInstanceStatus"]
+
+    @property
+    def engine_version(self):
+        return self._get_db_instance_data()["EngineVersion"]
 
     @property
     def is_upgradable(self):
