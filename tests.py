@@ -1,3 +1,4 @@
+import doctest
 import json
 import unittest
 from unittest import mock
@@ -197,6 +198,16 @@ class RDSPostgresUpgraderTests(unittest.TestCase):
             )["DBInstances"][0]["EngineVersion"],
             "9.3.14"
         )
+
+
+class DocTests(unittest.TestCase):
+    def test_models(self):
+        import models
+        assert doctest.testmod(models, verbose=True, raise_on_error=True)
+
+    def test_utils(self):
+        import utils
+        assert doctest.testmod(utils, verbose=True, raise_on_error=True)
 
 
 if __name__ == '__main__':

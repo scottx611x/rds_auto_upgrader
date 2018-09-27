@@ -21,4 +21,4 @@
 
 ### Running Tests:
 - `python tests.py`
-- `python -m doctest -v pg_upgrader.py`
+- `python -m doctest -v *.py`

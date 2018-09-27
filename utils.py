@@ -27,7 +27,7 @@ class RDSPostgresWaiter:
     modifying/upgrading an RDSInstance
 
     >>> from models import rds_client
-    >>> from moto import mock_rds; mock_rds().start()
+    >>> from moto import mock_rds2; mock_rds2().start()
     >>> from test_data.utils import make_postgres_instance
     >>> make_postgres_instance()
     RDSPostgresInstance id: test-rds-id status: available engine_version: 9.3.14
