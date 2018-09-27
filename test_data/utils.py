@@ -1,9 +1,8 @@
-import json
 from unittest import mock
 
 import boto3
 from moto import mock_rds
-from pg_upgrader import RDSPostgresInstance, RDSPostgresUpgrader, rds_client
+from models import RDSPostgresInstance, RDSPostgresUpgrader, rds_client
 from test_data.fixtures import describe_db_engine_versions, \
     list_tags_for_resource, test_instance_id, test_instance_name_value, \
     test_instance_name_key, test_instance_owner_key, test_instance_owner_value, \

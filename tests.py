@@ -3,9 +3,9 @@ import unittest
 from unittest import mock
 
 import boto3
-from moto import mock_rds
+from moto import mock_rds2
 
-from pg_upgrader import (RDSPostgresUpgrader, create_parser, rds_client)
+from models import RDSPostgresUpgrader, rds_client
 from test_data.fixtures import (list_tags_for_resource,
                                 describe_db_engine_versions, test_instance_id,
                                 test_instance_name_key,
@@ -13,9 +13,10 @@ from test_data.fixtures import (list_tags_for_resource,
                                 test_instance_name_value,
                                 test_instance_owner_value, test_tags)
 from test_data.utils import make_postgres_instance
+from upgrade import create_parser
 
 
-@mock_rds
+@mock_rds2
 @mock.patch.object(
     rds_client, "describe_db_engine_versions",
     side_effect=describe_db_engine_versions
@@ -36,7 +37,7 @@ class RDSPostgresInstanceTests(unittest.TestCase):
                          ['9.4.18', '9.5.13', '9.6.9', '10.4'])
 
 
-@mock_rds
+@mock_rds2
 @mock.patch.object(
     rds_client, "describe_db_engine_versions",
     side_effect=describe_db_engine_versions
@@ -182,6 +183,19 @@ class RDSPostgresUpgraderTests(unittest.TestCase):
         self.assertEqual(len(rds_postgres_upgrader.rds_instances), 0)
         self.rds_client.delete_db_instance(
             DBInstanceIdentifier=mysql_instance_id
+        )
+
+    def test_nothing_upgraded_if_postgres_engine_never_available(self, *args):
+        self.rds_client.stop_db_instance(DBInstanceIdentifier=test_instance_id)
+        RDSPostgresUpgrader(
+            ids=[test_instance_id],
+            target_version="9.4.18"
+        ).upgrade_all()
+        self.assertEqual(
+            self.rds_client.describe_db_instances(
+                DBInstanceIdentifier=test_instance_id
+            )["DBInstances"][0]["EngineVersion"],
+            "9.3.14"
         )
 
 
