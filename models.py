@@ -55,20 +55,26 @@ class RDSInstance:
 
     def get_engine_upgrade_path(self):
         """
-        Gather the proper "upgrade path" based on the current Postgres engine
+        Gather the proper "upgrade path" based on the current engine
         version associated with the given RDS Instance.
 
         For PostgreSQL major version upgrades one has to go from:
          9.3.x -> 9.4.x -> 9.5.x -> 9.6.x -> 10.x
 
-        See: https://amzn.to/2IdKOel
+        For MySQL major version upgrades one has to go from:
+         5.5.x -> 5.6.x -> 5.7.x
+
+        See: https://amzn.to/2IdKOel & https://amzn.to/2InXL5h
 
         :return: list of compatible major engine versions to upgrade to
 
         >>> from test_data.utils import make_rds_instance
-        >>> rds_instance = make_rds_instance()
+        >>> rds_instance = make_rds_instance(db_engine="postgres", db_engine_version="9.3.14")
         >>> rds_instance.upgrade_path
         ['9.4.18', '9.5.13', '9.6.9', '10.4']
+        >>> rds_instance = make_rds_instance(db_engine="mysql", db_engine_version="5.5.46")
+        >>> rds_instance.upgrade_path
+        ['5.6.40', '5.7.22']
         """
         return self._get_upgrade_path(self.engine_version)
 
@@ -142,8 +148,8 @@ class RDSInstance:
     @property
     def has_supported_engine(self):
         """
-        Check that the engine of the RDS Instnace we're to upgrade is indeed
-        a Postgres one.
+        Check that the engine of the RDS Instance we're to upgrade is indeed
+        one we currently support.
         :return: bool
 
         >>> from test_data.utils import make_rds_instance

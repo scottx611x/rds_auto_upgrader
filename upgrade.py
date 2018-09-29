@@ -19,7 +19,7 @@ def create_parser():
     )
     parser.add_argument(
         "-v", "--targeted_major_version", type=str,
-        help='Postgres major DBEngineVersion to target for the upgrade'
+        help='Major DBEngineVersion to target for the upgrade'
     )
     return parser
 

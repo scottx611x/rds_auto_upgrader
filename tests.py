@@ -14,8 +14,7 @@ from test_data.fixtures import (list_tags_for_resource,
                                 test_instance_owner_key,
                                 test_instance_name_value,
                                 test_instance_owner_value, test_tags,
-                                describe_db_instances,
-                                describe_mysql_db_engine_versions)
+                                describe_db_instances)
 from test_data.utils import make_rds_instance
 from upgrade import create_parser
 
