@@ -2,7 +2,7 @@ import boto3
 
 from utils import ExceptionCatchingThread, RDSWaiter
 
-rds_client = boto3.client('rds')
+rds_client = boto3.client("rds")
 
 
 class RDSInstance:
@@ -18,9 +18,13 @@ class RDSInstance:
         self.upgrade_path = self.get_engine_upgrade_path()
 
     def __repr__(self):
-        return ("RDSInstance id: {}, status: {}, engine: {}, engine_version: {}"
-                .format(self.db_instance_id, self.db_instance_status,
-                        self.engine, self.engine_version, self.target_version))
+        return "RDSInstance id: {}, status: {}, engine: {}, engine_version: {}".format(
+            self.db_instance_id,
+            self.db_instance_status,
+            self.engine,
+            self.engine_version,
+            self.target_version,
+        )
 
     def _get_db_instance_data(self):
         return rds_client.describe_db_instances(
@@ -95,14 +99,17 @@ class RDSInstance:
 
         for db_engine_version in db_engine_versions:
             available_major_versions = [
-                upgrade_target["EngineVersion"] for upgrade_target in
-                db_engine_version["ValidUpgradeTarget"]
+                upgrade_target["EngineVersion"]
+                for upgrade_target in db_engine_version["ValidUpgradeTarget"]
                 if upgrade_target["IsMajorVersionUpgrade"]
             ]
             if self.target_version in available_major_versions:
-                print("Target version: {} found in "
-                      "available_major_versions: {}".format(
-                       self.target_version, available_major_versions))
+                print(
+                    "Target version: {} found in "
+                    "available_major_versions: {}".format(
+                        self.target_version, available_major_versions
+                    )
+                )
                 major_version_upgrades.append(self.target_version)
                 return major_version_upgrades
 
@@ -114,7 +121,7 @@ class RDSInstance:
                 major_version_upgrades.append(most_recent_major_version)
                 return self._get_upgrade_path(
                     most_recent_major_version,
-                    major_version_upgrades=major_version_upgrades
+                    major_version_upgrades=major_version_upgrades,
                 )  # recursive call
 
     def _modify_db(self):
@@ -127,13 +134,12 @@ class RDSInstance:
         availability before attempting to modify them.
         """
         for pg_engine_version in self.upgrade_path:
-            with RDSWaiter(rds_client, self.db_instance_id,
-                           pg_engine_version):
+            with RDSWaiter(rds_client, self.db_instance_id, pg_engine_version):
                 rds_client.modify_db_instance(
                     DBInstanceIdentifier=self.db_instance_id,
                     EngineVersion=pg_engine_version,
                     AllowMajorVersionUpgrade=True,
-                    ApplyImmediately=True
+                    ApplyImmediately=True,
                 )
 
     def upgrade(self):
@@ -162,9 +168,9 @@ class RDSInstance:
             print(
                 "Excluding DB instance: {} as it does have a supported "
                 "db engine. DB Engine: '{}' was reported. "
-                "Current supported engines are: {}"
-                    .format(self.db_instance_id, self.engine,
-                            self.SUPPORTED_ENGINES)
+                "Current supported engines are: {}".format(
+                    self.db_instance_id, self.engine, self.SUPPORTED_ENGINES
+                )
             )
         return _has_supported_engine
 
@@ -180,11 +186,12 @@ class RDSUpgrader:
         if tags is not None:
             ids = self._get_db_instance_ids_from_tags(tags)
         self.rds_instances = [
-            instance for instance in [
-                RDSInstance(db_instance_id,
-                            target_version=target_version)
+            instance
+            for instance in [
+                RDSInstance(db_instance_id, target_version=target_version)
                 for db_instance_id in ids
-            ] if instance.is_upgradable
+            ]
+            if instance.is_upgradable
         ]
 
     def _get_db_instance_ids_from_tags(self, tags):
@@ -202,9 +209,7 @@ class RDSUpgrader:
         ['test-rds-id']
         """
         matching_instance_ids = set([])
-        for db_instance in rds_client.describe_db_instances()[
-            "DBInstances"
-        ]:
+        for db_instance in rds_client.describe_db_instances()["DBInstances"]:
             tag_list = rds_client.list_tags_for_resource(
                 ResourceName=db_instance["DBInstanceArn"]
             )["TagList"]

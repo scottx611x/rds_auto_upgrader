@@ -9,6 +9,7 @@ class ExceptionCatchingThread(Thread):
     threading.Thread, however, if an exception occurs in the thread
     the error will be caught and printed to stderr.
     """
+
     def __init__(self, **kwargs):
         super(ExceptionCatchingThread, self).__init__(**kwargs)
         self._real_run = self.run
@@ -41,6 +42,7 @@ class RDSWaiter:
     Status of: test-rds-id is: available
     Successfully upgraded test-rds-id to: 9.4.18
     """
+
     def __init__(self, client, db_instance_id, pg_engine_version, sleep_time=60):
         self.engine_version = pg_engine_version
         self.instance_id = db_instance_id
@@ -53,10 +55,11 @@ class RDSWaiter:
         def wait_with_status_reporting(**kwargs):
             print("Polling: {} for availability".format(self.instance_id))
             response = _operation_method(**kwargs)
-            print("Status of: {} is: {}".format(
-                self.instance_id,
-                response["DBInstances"][0]["DBInstanceStatus"]
-            ))
+            print(
+                "Status of: {} is: {}".format(
+                    self.instance_id, response["DBInstances"][0]["DBInstanceStatus"]
+                )
+            )
             return response
 
         self.rds_waiter._operation_method = wait_with_status_reporting
@@ -65,9 +68,11 @@ class RDSWaiter:
         self.rds_waiter.wait(DBInstanceIdentifier=self.instance_id)
 
     def __exit__(self, type, value, traceback):
-        print("Upgrading {} to: {}"
-              .format(self.instance_id, self.engine_version))
+        print("Upgrading {} to: {}".format(self.instance_id, self.engine_version))
         time.sleep(self.sleep_time)
         self.rds_waiter.wait(DBInstanceIdentifier=self.instance_id)
-        print("Successfully upgraded {} to: {}"
-              .format(self.instance_id, self.engine_version))
+        print(
+            "Successfully upgraded {} to: {}".format(
+                self.instance_id, self.engine_version
+            )
+        )
