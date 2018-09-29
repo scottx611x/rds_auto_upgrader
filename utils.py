@@ -21,17 +21,17 @@ class ExceptionCatchingThread(Thread):
             print(exc, file=sys.stderr)
 
 
-class RDSPostgresWaiter:
+class RDSWaiter:
     """
     Context manager that provides the waiting functionality when
     modifying/upgrading an RDSInstance
 
     >>> from models import rds_client
     >>> from moto import mock_rds2; mock_rds2().start()
-    >>> from test_data.utils import make_postgres_instance
-    >>> make_postgres_instance()
-    RDSPostgresInstance id: test-rds-id status: available engine_version: 9.3.14
-    >>> with RDSPostgresWaiter(rds_client, "test-rds-id", "9.4.18", sleep_time=0):
+    >>> from test_data.utils import make_rds_instance
+    >>> make_rds_instance()
+    RDSInstance id: test-rds-id, status: available, engine: postgres, engine_version: 9.3.14
+    >>> with RDSWaiter(rds_client, "test-rds-id", "9.4.18", sleep_time=0):
     ...    print("Upgrading soon!")
     Polling: test-rds-id for availability
     Status of: test-rds-id is: available

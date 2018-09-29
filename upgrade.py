@@ -1,12 +1,12 @@
 import argparse
 import json
 
-from models import RDSPostgresUpgrader
+from models import RDSUpgrader
 
 
 def create_parser():
     parser = argparse.ArgumentParser(
-        description='Gather RDSPostgresUpgrader configurables.'
+        description='Gather RDSUpgrader configurables.'
     )
     db_instance_id_group = parser.add_mutually_exclusive_group(required=True)
     db_instance_id_group.add_argument(
@@ -26,7 +26,7 @@ def create_parser():
 
 def main():
     args = create_parser().parse_args()
-    RDSPostgresUpgrader(
+    RDSUpgrader(
         ids=args.rds_db_instance_ids,
         tags=args.rds_db_instance_tags,
         target_version=args.targeted_major_version
