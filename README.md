@@ -3,7 +3,7 @@
 
 ### What is does:
 
-`rds_postgres_upgrader` allows one to perform major version upgrades on many PostgreSQL or MySQL RDS Instances in parallel. While doing so, it will automatically resolve the proper [PostgreSQL](https://docs.aws.amazon.com/AmazonRDS/latest/UserGuide/USER_UpgradeDBInstance.PostgreSQL.html#USER_UpgradeDBInstance.PostgreSQL.MajorVersion) or [MySQL](https://amzn.to/2InXL5h) major version upgrade path, and wait for RDS Instance availability before performing subsequent upgrades. 
+`rds_auto_upgrader` allows one to perform major version upgrades on many PostgreSQL or MySQL RDS Instances in parallel. While doing so, it will automatically resolve the proper [PostgreSQL](https://docs.aws.amazon.com/AmazonRDS/latest/UserGuide/USER_UpgradeDBInstance.PostgreSQL.html#USER_UpgradeDBInstance.PostgreSQL.MajorVersion) or [MySQL](https://amzn.to/2InXL5h) major version upgrade path, and wait for RDS Instance availability before performing subsequent upgrades. 
 
 If you're really out of date (like I was), upgrading to the latest major version for your respective DB engine on RDS can be pretty time consuming since you have to perform major version upgrades like so:
 
@@ -13,7 +13,7 @@ If you're really out of date (like I was), upgrading to the latest major version
 
 Now, imagine upgrading an entire fleet! 
 
-With `rds_postgres_upgrader`, a single command could take care of that for you: 
+With `rds_auto_upgrader`, a single command could take care of that for you: 
    
   **`$ python upgrade.py -tags {"taggedForUpgrade": True}`**
   
