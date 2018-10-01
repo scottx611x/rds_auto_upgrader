@@ -23,7 +23,6 @@ class RDSInstance:
             self.db_instance_status,
             self.engine,
             self.engine_version,
-            self.target_version,
         )
 
     def _get_db_instance_data(self):
