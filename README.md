@@ -28,6 +28,9 @@ With `rds_auto_upgrader`, a single command could take care of that for you:
 - `pip install -r requirements.txt`
 
 ### Examples:
+- **Perform a dry run to see how your RDSInstances will traverse major upgrade versions**
+    - `python upgrade.py -ids my-cool-db-a --dry_run`
+        - `RDSInstance: my-cool-db-a will be upgraded as follows: 9.4.19 -> 9.5.14 -> 9.6.10 -> 10.5`
 
 - **Upgrade many RDS instances to their latest available major version by DbInstanceIdentifers**:
     - `python upgrade.py -ids my-cool-db-a my-cool-db-b`

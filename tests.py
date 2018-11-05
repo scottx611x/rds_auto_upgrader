@@ -192,6 +192,14 @@ class RDSUpgraderTests(unittest.TestCase):
             "9.3.14",
         )
 
+    def test_get_dry_run_info(self, *args):
+        rds_upgrader = RDSUpgrader(ids=[test_instance_id])
+        self.assertEqual(
+            rds_upgrader.get_dry_run_info(),
+            "RDSInstance: {} will be upgraded as follows: 9.4.18 -> 9.5.13 -> 9.6.9 -> 10.4\n"
+            .format(test_instance_id)
+        )
+
 
 class DocTests(unittest.TestCase):
     def test_models(self):

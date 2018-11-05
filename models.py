@@ -219,6 +219,23 @@ class RDSUpgrader:
             print("No instances found matching tags: {}".format(tags))
         return list(matching_instance_ids)
 
+    def get_dry_run_info(self):
+        """
+        Construct and return a string containing rds_instances db_instnace_ids
+        and their corresponding upgrade paths
+
+        Ex: RDSInstance: fake-postgres will be upgraded as follows: 9.4.19 -> 9.5.14 -> 9.6.10 -> 10.5
+        """
+        dry_run_info = ""
+        for rds_instance in self.rds_instances:
+            dry_run_info += (
+                "RDSInstance: {} will be upgraded as follows: {}\n".format(
+                    rds_instance.db_instance_id,
+                    " -> ".join(rds_instance.upgrade_path)
+                )
+            )
+        return dry_run_info
+
     def upgrade_all(self):
         for rds_instance in self.rds_instances:
             upgrade_thread = rds_instance.upgrade()
