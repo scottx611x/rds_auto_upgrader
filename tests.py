@@ -31,7 +31,7 @@ class RDSInstanceTests(unittest.TestCase):
             "engine: postgres, engine_version: 9.3.14",
         )
 
-    def test_upgrade_path_potgres(self):
+    def test_upgrade_path_postgres(self):
         self.assertEqual(
             make_rds_instance().upgrade_path, ["9.4.18", "9.5.13", "9.6.9", "10.4"]
         )
